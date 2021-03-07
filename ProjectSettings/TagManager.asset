@@ -7,6 +7,7 @@ TagManager:
   - Wall
   - Zombie
   - SpeedBoost
+  - Health
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - Zombie
   - Wall
   - Speed
-  - 
+  - Health
   - 
   - 
   - 

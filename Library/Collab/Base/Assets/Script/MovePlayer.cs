@@ -1,98 +1,184 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections;
+
 
 public class MovePlayer : MonoBehaviour
+
 {
-  public Vector2 velocity;
+    public Vector2 velocity;
 
+    private Animator anim;
+    [SerializeField] private LayerMask platformsLayerMask;
+    private Rigidbody2D rigidbody2d;
+    private BoxCollider2D boxCollider2d;
+    public static float healthAmount;
 
-      [SerializeField] private LayerMask platformsLayerMask;
-      private Rigidbody2D rigidbody2d;
-      private BoxCollider2D boxCollider2d;
-      int healthnum = 2;
+    private bool walk, walk_left, walk_right, jump;
+    float moveSpeed = 40f;
+    float boostTimer = 0;
+    bool boosting = false;
 
-
-  private bool walk, walk_left, walk_right, jump;
+    bool keypressed = true;
 
 
     // Start is called before the first frame update
     void Start()
     {
-      rigidbody2d = transform.GetComponent<Rigidbody2D>();
-      boxCollider2d = transform.GetComponent<BoxCollider2D>();
+        anim = GetComponent<Animator>();
+        rigidbody2d = transform.GetComponent<Rigidbody2D>();
+        boxCollider2d = transform.GetComponent<BoxCollider2D>();
+        healthAmount = 0.2f;
     }
 
     // Update is called once per frame
     void Update()
     {
-     CheckPlayerInput();
-    UpdatePlayerPosition();
+        CheckAnimation();
+        CheckPlayerInput();
+        UpdatePlayerPosition();
+        GameEnd();
     }
 
-    void UpdatePlayerPosition(){
+    public void GameEnd()
+    {
+        if (healthAmount <= 0)
+        {
 
-      Vector3 pos = transform.localPosition;
-      Vector3 scale = transform.localScale;
-      if (walk){
 
-        if(walk_left){
-          pos.x -=velocity.x * Time.deltaTime;
-          scale.x =-1;
+
+            keypressed = false;
+            StartCoroutine(ChangeToScene("GameOver"));
         }
-        if (walk_right){
-          pos.x +=velocity.x *Time.deltaTime;
-          scale.x = 1;
+    }
+
+
+    public IEnumerator ChangeToScene(string sceneToChangeTo)
+    {
+        yield return new WaitForSeconds(3);
+        Application.LoadLevel(sceneToChangeTo);
+    }
+
+    void UpdatePlayerPosition()
+    {
+
+        Vector3 pos = transform.localPosition;
+
+        Vector3 scale = transform.localScale;
+        if (keypressed)
+        {
+            if (walk)
+            {
+
+                if (walk_left)
+                {
+                    pos.x -= velocity.x * Time.deltaTime;
+                    scale.x = Math.Abs(scale.x) * -1;
+                }
+                if (walk_right)
+                {
+                    pos.x += velocity.x * Time.deltaTime;
+                    scale.x = Math.Abs(scale.x);
+                }
+
+            }
+            if (IsGrounded() && Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                float jumpVelocity = 100f;
+                rigidbody2d.velocity = Vector2.up * jumpVelocity;
+            }
+
+
+            HandleMovement_FullMidAirControl();
         }
+        transform.localPosition = pos;
+        transform.localScale = scale;
+    }
 
-      }
-      if (IsGrounded() && Input.GetKeyDown(KeyCode.UpArrow)) {
-          float jumpVelocity = 100f;
-          rigidbody2d.velocity = Vector2.up * jumpVelocity;
-      }
+    void CheckAnimation()
+    {
+        if (keypressed)
+        {
+            if (walk)
+            {
+                anim.Play("Run");
+            }
+            else if (jump)
+            {
+                anim.Play("Jump");
+            }
 
-      HandleMovement_FullMidAirControl();
-
-      transform.localPosition = pos;
-      transform.localScale = scale;
+            else
+            {
+                anim.Play("Idle");
+            }
+        }
+        if (healthAmount <= 0)
+        {
+            anim.Play("Death");
+        }
     }
 
     void OnCollisionEnter2D(Collision2D col)
     {
-      if (col.gameObject.CompareTag("Zombie") ){
-        healthnum -= healthnum;
-        Debug.Log(healthnum);
+        if (col.gameObject.CompareTag("Zombie"))
+        {
+            healthAmount = healthAmount - 0.1f;
+            Debug.Log(healthAmount);
 
-      }
-      }
-
-
-
-
-    void CheckPlayerInput(){
-      bool input_left = Input.GetKey(KeyCode.LeftArrow);
-      bool input_right = Input.GetKey(KeyCode.RightArrow);
-      bool input_jump = Input.GetKey(KeyCode.UpArrow);
-
-      walk = input_left || input_right;
-      walk_left = input_left && !input_right;
-      walk_right = input_right && !input_left;
-      jump = input_jump;
+        }
     }
 
-    private bool IsGrounded() {
+
+
+
+    void CheckPlayerInput()
+    {
+        bool input_left = Input.GetKey(KeyCode.LeftArrow);
+        bool input_right = Input.GetKey(KeyCode.RightArrow);
+        bool input_jump = Input.GetKey(KeyCode.UpArrow);
+
+        walk = input_left || input_right;
+        walk_left = input_left && !input_right;
+        walk_right = input_right && !input_left;
+        jump = input_jump;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag == "SpeedBoost")
+        {
+            boosting = true;
+            moveSpeed = 80f;
+            Destroy(other.gameObject);
+        }
+    }
+
+    private bool IsGrounded()
+    {
         RaycastHit2D raycastHit2d = Physics2D.BoxCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, 0f, Vector2.down, 1f, platformsLayerMask);
         return raycastHit2d.collider != null;
     }
 
-    private void HandleMovement_FullMidAirControl() {
-        float moveSpeed = 40f;
-        if (Input.GetKey(KeyCode.LeftArrow)) {
+
+    private void HandleMovement_FullMidAirControl()
+    {
+
+
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
             rigidbody2d.velocity = new Vector2(-moveSpeed, rigidbody2d.velocity.y);
-        } else {
-            if (Input.GetKey(KeyCode.RightArrow)) {
+        }
+        else
+        {
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
                 rigidbody2d.velocity = new Vector2(+moveSpeed, rigidbody2d.velocity.y);
-            } else {
+            }
+            else
+            {
                 // No keys pressed
                 rigidbody2d.velocity = new Vector2(0, rigidbody2d.velocity.y);
             }

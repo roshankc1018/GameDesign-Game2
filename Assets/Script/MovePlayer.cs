@@ -19,10 +19,12 @@ public class MovePlayer : MonoBehaviour
     private bool walk, walk_left, walk_right, jump;
     float moveSpeed = 40f;
     float boostTimer = 0;
+    float healthUp = 0.1f;
     bool boosting = false;
 
     bool keypressed = true;
 
+    public AudioSource audioSource;
 
     // Start is called before the first frame update
     void Start()
@@ -31,6 +33,8 @@ public class MovePlayer : MonoBehaviour
         rigidbody2d = transform.GetComponent<Rigidbody2D>();
         boxCollider2d = transform.GetComponent<BoxCollider2D>();
         healthAmount = 0.2f;
+        audioSource = GetComponent<AudioSource>();
+
     }
 
     // Update is called once per frame
@@ -40,8 +44,24 @@ public class MovePlayer : MonoBehaviour
         CheckPlayerInput();
         UpdatePlayerPosition();
         GameEnd();
+
+        if (boosting)
+        {
+            boostTimer += Time.deltaTime;
+            if (boostTimer >= 5)
+            {
+                moveSpeed = 40f;
+                boostTimer = 0;
+                boosting = false;
+            }
+        }
     }
 
+    public void GetAudioClip(string clip)
+    {
+        audioSource.clip = Resources.Load<AudioClip>(clip);
+        audioSource.Play();
+    }
     public void GameEnd()
     {
         if (healthAmount <= 0)
@@ -104,10 +124,12 @@ public class MovePlayer : MonoBehaviour
             if (walk)
             {
                 anim.Play("Run");
+                GetAudioClip("Running");
             }
             else if (jump)
             {
                 anim.Play("Jump");
+                GetAudioClip("Jump2");
             }
 
             else
@@ -118,16 +140,17 @@ public class MovePlayer : MonoBehaviour
         if (healthAmount <= 0)
         {
             anim.Play("Death");
+            GetAudioClip("Death");
         }
     }
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.gameObject.CompareTag("Zombie"))
+        if (col.gameObject.CompareTag("Zombie") && keypressed)
         {
             healthAmount = healthAmount - 0.1f;
             Debug.Log(healthAmount);
-
+            GetAudioClip("Speed Up");
         }
     }
 
@@ -153,6 +176,12 @@ public class MovePlayer : MonoBehaviour
             boosting = true;
             moveSpeed = 80f;
             Destroy(other.gameObject);
+        }
+
+        if (other.tag == "Health")
+        {
+            Destroy(other.gameObject);
+            healthAmount = healthAmount + healthUp;
         }
     }
 
