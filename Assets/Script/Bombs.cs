@@ -15,6 +15,7 @@ public class Bombs : MonoBehaviour
     {
         rigidbody2d = transform.GetComponent<Rigidbody2D>();
         boxCollider2d = transform.GetComponent<BoxCollider2D>();
+        audioSource = GetComponent<AudioSource>();
 
     }
 

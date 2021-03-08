@@ -56,7 +56,7 @@ public class MoveZombieLeft : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.gameObject.CompareTag("Wall") && ground)
+        if (col.gameObject.CompareTag("Wall") || col.gameObject.CompareTag("Zombie") && ground)
         {
 
             if (zombieScale.x > 0)
