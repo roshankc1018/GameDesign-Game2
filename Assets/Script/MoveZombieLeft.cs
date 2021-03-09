@@ -15,6 +15,8 @@ public class MoveZombieLeft : MonoBehaviour
     private Rigidbody2D rigidbody2d;
     private BoxCollider2D boxCollider2d;
     Vector3 zombieScale, zombiePos;
+
+    public int health = 10;
     bool once = false;
 
     bool istrue;
@@ -53,7 +55,21 @@ public class MoveZombieLeft : MonoBehaviour
 
     }
 
+    public void damageTaken(int damage)
+    {
+        health -= damage;
 
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+
+        Destroy(gameObject);
+    }
     void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Wall") || col.gameObject.CompareTag("Zombie") && ground)

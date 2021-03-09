@@ -15,11 +15,13 @@ public class MoveZombieRight : MonoBehaviour
     private Rigidbody2D rigidbody2d;
     private BoxCollider2D boxCollider2d;
     Vector3 zombieScale, zombiePos;
-    bool once = false;
 
+    public int health = 10;
+    bool once = false;
     bool istrue;
     bool ground = false;
     bool isLeftZombie = false;
+    
 
     private void Start()
     {
@@ -53,6 +55,21 @@ public class MoveZombieRight : MonoBehaviour
 
     }
 
+   public void damageTaken(int damage)
+    {
+        health -= damage;
+
+        if(health <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+       
+        Destroy(gameObject);
+    }
 
     void OnCollisionEnter2D(Collision2D col)
     {

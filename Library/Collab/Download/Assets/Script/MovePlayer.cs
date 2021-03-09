@@ -20,10 +20,13 @@ public class MovePlayer : MonoBehaviour
     float moveSpeed = 40f;
     float boostTimer = 0;
     float healthUp = 0.1f;
+    float bullets = 0;
+    bool weaponized = false;
     bool boosting = false;
 
     bool keypressed = true;
 
+    public AudioSource audioSource;
 
     // Start is called before the first frame update
     void Start()
@@ -32,6 +35,8 @@ public class MovePlayer : MonoBehaviour
         rigidbody2d = transform.GetComponent<Rigidbody2D>();
         boxCollider2d = transform.GetComponent<BoxCollider2D>();
         healthAmount = 0.2f;
+        audioSource = GetComponent<AudioSource>();
+
     }
 
     // Update is called once per frame
@@ -45,15 +50,29 @@ public class MovePlayer : MonoBehaviour
         if (boosting)
         {
             boostTimer += Time.deltaTime;
-            if(boostTimer >= 5)
+            if (boostTimer >= 5)
             {
                 moveSpeed = 40f;
                 boostTimer = 0;
                 boosting = false;
             }
         }
+        
+        if (weaponized)
+        {
+            
+            if(bullets == 0)
+            {
+                weaponized = false;
+            }
+        }
     }
 
+    public void GetAudioClip(string clip)
+    {
+        audioSource.clip = Resources.Load<AudioClip>(clip);
+        audioSource.Play();
+    }
     public void GameEnd()
     {
         if (healthAmount <= 0)
@@ -116,10 +135,12 @@ public class MovePlayer : MonoBehaviour
             if (walk)
             {
                 anim.Play("Run");
+                GetAudioClip("Running");
             }
             else if (jump)
             {
                 anim.Play("Jump");
+                GetAudioClip("Jump2");
             }
 
             else
@@ -130,16 +151,17 @@ public class MovePlayer : MonoBehaviour
         if (healthAmount <= 0)
         {
             anim.Play("Death");
+            GetAudioClip("Death");
         }
     }
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.gameObject.CompareTag("Zombie"))
+        if (col.gameObject.CompareTag("Zombie") && keypressed)
         {
             healthAmount = healthAmount - 0.1f;
             Debug.Log(healthAmount);
-
+            GetAudioClip("Speed Up");
         }
     }
 
@@ -172,11 +194,20 @@ public class MovePlayer : MonoBehaviour
             Destroy(other.gameObject);
             healthAmount = healthAmount + healthUp;
         }
+
+        if(other.tag == "Gun")
+        {
+            weaponized = true;
+            bullets = 1;
+            Destroy(other.gameObject);
+            
+        }
     }
 
     private bool IsGrounded()
     {
         RaycastHit2D raycastHit2d = Physics2D.BoxCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, 0f, Vector2.down, 1f, platformsLayerMask);
+
         return raycastHit2d.collider != null;
     }
 

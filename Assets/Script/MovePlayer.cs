@@ -20,6 +20,8 @@ public class MovePlayer : MonoBehaviour
     float moveSpeed = 40f;
     float boostTimer = 0;
     float healthUp = 0.1f;
+    float bullets = 0;
+    bool weaponized = false;
     bool boosting = false;
 
     bool keypressed = true;
@@ -55,6 +57,15 @@ public class MovePlayer : MonoBehaviour
                 boosting = false;
             }
         }
+
+        if (weaponized)
+        {
+
+            if(bullets == 0)
+            {
+                weaponized = false;
+            }
+        }
     }
 
     public void GetAudioClip(string clip)
@@ -64,7 +75,8 @@ public class MovePlayer : MonoBehaviour
     }
     public void GameEnd()
     {
-        if (healthAmount <= 0)
+
+        if (healthAmount <= 0.01 || rigidbody2d.position.y < 300f)
         {
 
 
@@ -77,7 +89,7 @@ public class MovePlayer : MonoBehaviour
 
     public IEnumerator ChangeToScene(string sceneToChangeTo)
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2f);
         Application.LoadLevel(sceneToChangeTo);
     }
 
@@ -129,7 +141,7 @@ public class MovePlayer : MonoBehaviour
             else if (jump)
             {
                 anim.Play("Jump");
-                GetAudioClip("Jump2");
+                GetAudioClip("Jump22");
             }
 
             else
@@ -137,7 +149,7 @@ public class MovePlayer : MonoBehaviour
                 anim.Play("Idle");
             }
         }
-        if (healthAmount <= 0)
+        if (healthAmount <= 0.01)
         {
             anim.Play("Death");
             GetAudioClip("Death");
@@ -152,6 +164,7 @@ public class MovePlayer : MonoBehaviour
             Debug.Log(healthAmount);
             GetAudioClip("Speed Up");
         }
+        
     }
 
 
@@ -182,6 +195,14 @@ public class MovePlayer : MonoBehaviour
         {
             Destroy(other.gameObject);
             healthAmount = healthAmount + healthUp;
+        }
+
+        if(other.tag == "Gun")
+        {
+            weaponized = true;
+            bullets = 1;
+            Destroy(other.gameObject);
+
         }
     }
 

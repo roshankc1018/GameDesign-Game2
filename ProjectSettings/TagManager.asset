@@ -8,6 +8,8 @@ TagManager:
   - Zombie
   - SpeedBoost
   - Health
+  - Gun
+  - Boats
   layers:
   - Default
   - TransparentFX
