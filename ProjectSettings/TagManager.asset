@@ -10,6 +10,7 @@ TagManager:
   - Health
   - Gun
   - Boats
+  - Bullet
   layers:
   - Default
   - TransparentFX

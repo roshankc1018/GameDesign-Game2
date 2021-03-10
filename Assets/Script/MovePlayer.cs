@@ -10,6 +10,9 @@ public class MovePlayer : MonoBehaviour
 {
     public Vector2 velocity;
 
+    public Transform firePoint;
+    public GameObject bulletPrefab;
+
     private Animator anim;
     [SerializeField] private LayerMask platformsLayerMask;
     private Rigidbody2D rigidbody2d;
@@ -17,10 +20,10 @@ public class MovePlayer : MonoBehaviour
     public static float healthAmount;
 
     private bool walk, walk_left, walk_right, jump;
-    float moveSpeed = 40f;
+    float moveSpeed = 30f;
+    float jumpVelocity = 100f;
     float boostTimer = 0;
     float healthUp = 0.1f;
-    float bullets = 0;
     bool weaponized = false;
     bool boosting = false;
 
@@ -52,20 +55,28 @@ public class MovePlayer : MonoBehaviour
             boostTimer += Time.deltaTime;
             if (boostTimer >= 5)
             {
-                moveSpeed = 40f;
+                moveSpeed = 30f;
                 boostTimer = 0;
                 boosting = false;
             }
         }
 
+
+
         if (weaponized)
         {
-
-            if(bullets == 0)
+            if (Input.GetButtonDown("Fire1"))
             {
+                Shoot();
                 weaponized = false;
             }
+
         }
+    }
+
+    void Shoot()
+    {
+        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
     }
 
     public void GetAudioClip(string clip)
@@ -108,17 +119,19 @@ public class MovePlayer : MonoBehaviour
                 {
                     pos.x -= velocity.x * Time.deltaTime;
                     scale.x = Math.Abs(scale.x) * -1;
+                  //  transform.Rotate(0f, 180f, 0f);
                 }
                 if (walk_right)
                 {
                     pos.x += velocity.x * Time.deltaTime;
                     scale.x = Math.Abs(scale.x);
+
                 }
 
             }
-            if (IsGrounded() && Input.GetKeyDown(KeyCode.UpArrow))
+            if (IsGrounded() && jump)
             {
-                float jumpVelocity = 100f;
+
                 rigidbody2d.velocity = Vector2.up * jumpVelocity;
             }
 
@@ -164,7 +177,7 @@ public class MovePlayer : MonoBehaviour
             Debug.Log(healthAmount);
             GetAudioClip("Speed Up");
         }
-        
+
     }
 
 
@@ -172,9 +185,9 @@ public class MovePlayer : MonoBehaviour
 
     void CheckPlayerInput()
     {
-        bool input_left = Input.GetKey(KeyCode.LeftArrow);
-        bool input_right = Input.GetKey(KeyCode.RightArrow);
-        bool input_jump = Input.GetKey(KeyCode.UpArrow);
+        bool input_left = (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A));
+        bool input_right = (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D));
+        bool input_jump = (Input.GetKey(KeyCode.UpArrow)||Input.GetKey(KeyCode.W)|| Input.GetKey(KeyCode.Space));
 
         walk = input_left || input_right;
         walk_left = input_left && !input_right;
@@ -187,7 +200,7 @@ public class MovePlayer : MonoBehaviour
         if (other.tag == "SpeedBoost")
         {
             boosting = true;
-            moveSpeed = 80f;
+            moveSpeed = 50f;
             Destroy(other.gameObject);
         }
 
@@ -200,7 +213,6 @@ public class MovePlayer : MonoBehaviour
         if(other.tag == "Gun")
         {
             weaponized = true;
-            bullets = 1;
             Destroy(other.gameObject);
 
         }
