@@ -1,7 +1,7 @@
-# GameDesign-Game2
+#  Monster Runner
 #
-# Description Game "Monster Runner"
 #
+# Description:
 ## Start Menu:
 Menu to either Play, Other options, or Quit game
 
@@ -18,7 +18,7 @@ You are being attacked by the biggest alien or mother of alien who is more power
 You land back on earth and continue your daily job (Or you just go home, that was a lot of running). All is well.
 #
 #
-# Objects
+# Objects:
 ## Player - Main character controlled by the user
 ## Small Mushroom Monster - Alien moving right and left and player lose one hit point if touched by it
 ## Big Mushroom Monster in Level 3 - The mother of alien who destroy everything in his way.
@@ -26,10 +26,9 @@ You land back on earth and continue your daily job (Or you just go home, that wa
 ## Gun - Can shoot monster only one time with one gun
 ## Spikes, Bombs - Obstacles in the way and player lose one hit point if touched by it.
 
-
 #
 #
-# Player Controls
+# Player Controls:
 ##  Jump - UpArrow/Key_W/Space
 ## Move Left - LeftArrow/Key_A
 ## Move Right - RightArrow/Key_D
